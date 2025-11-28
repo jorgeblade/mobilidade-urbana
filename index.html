@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, AlertCircle, CheckCircle, MapPin, DollarSign, Car, Package, Monitor, Key, Bus, School, MessageCircle } from 'lucide-react';
+/**
+ * BLADETEC SOLUÇÕES - Guia de Mobilidade & Renda Extra
+ * * Este aplicativo lista oportunidades de trabalho com veículo próprio na região RJ/Niterói/SG.
+ * Desenvolvido como Single Page Application (SPA) com React e Tailwind CSS.
+ * * @author Jorge (BLADETEC SOLUÇÕES)
+ * @since 2025
+ */
+
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, AlertCircle, CheckCircle, MapPin, DollarSign, Car, Package, Monitor, Key, Bus, School, MessageCircle, Search } from 'lucide-react';
 
 // --- DADOS DA APLICAÇÃO ---
 const data = [
@@ -88,6 +96,15 @@ const marketRules = [
   }
 ];
 
+// --- SEO KEYWORDS (Bairros e Regiões) ---
+const coverageAreas = [
+  "Niterói (Icaraí, Centro, Fonseca, Região Oceânica)",
+  "São Gonçalo (Alcântara, Centro, Neves, Colubandê)",
+  "Rio de Janeiro (Centro, Zona Sul, Barra da Tijuca, Recreio)",
+  "Baixada Fluminense (Duque de Caxias, Nova Iguaçu)",
+  "Hubs Logísticos: Pavuna, Queimados, São Cristóvão"
+];
+
 // Componente do Card Expansível
 const Card = ({ item }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -144,6 +161,30 @@ const Card = ({ item }) => {
 };
 
 export default function BladeTecApp() {
+  
+  // SEO SETUP: Configuração dinâmica de Meta Tags e Título
+  useEffect(() => {
+    document.title = "Renda Extra com Carro RJ e Niterói | Guia BladeTec";
+    
+    // Injeção de Meta Description para SEO
+    const metaDesc = document.createElement('meta');
+    metaDesc.name = "description";
+    metaDesc.content = "Descubra como ganhar dinheiro com seu carro em Niterói, São Gonçalo e Rio de Janeiro. Guia completo: Mercado Envios, Uber, Transporte Escolar e Logística.";
+    document.head.appendChild(metaDesc);
+
+    // Injeção de Keywords (Legado, mas útil para contexto semântico)
+    const metaKeywords = document.createElement('meta');
+    metaKeywords.name = "keywords";
+    metaKeywords.content = "Renda Extra RJ, Motorista App Niterói, Mercado Envios São Gonçalo, Agregar Carro RJ, Transporte Escolar Niterói, Lalamove Rio de Janeiro";
+    document.head.appendChild(metaKeywords);
+
+    return () => {
+      // Cleanup (opcional em SPAs simples, mas boa prática)
+      if(document.head.contains(metaDesc)) document.head.removeChild(metaDesc);
+      if(document.head.contains(metaKeywords)) document.head.removeChild(metaKeywords);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans selection:bg-[#008080] selection:text-white">
       
@@ -265,7 +306,7 @@ export default function BladeTecApp() {
         </div>
 
         {/* Seção Regras de Ouro */}
-        <div className="bg-[#1a1a1a] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#1a1a1a] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden mb-12">
           <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-r from-[#008080] via-gray-700 to-black"></div>
           
           <div className="text-center mb-10">
@@ -284,6 +325,21 @@ export default function BladeTecApp() {
                   <p className="text-gray-400 text-sm leading-relaxed border-l border-gray-700 pl-4">{rule.desc}</p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- SEO VISUAL: ÁREAS DE COBERTURA --- */}
+        <div className="border-t border-gray-300 pt-8 pb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Search size={20} className="text-gray-400" />
+            <h5 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Áreas com Alta Demanda Mapeadas</h5>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {coverageAreas.map((area, idx) => (
+              <span key={idx} className="bg-white border border-gray-200 text-gray-500 text-xs px-3 py-1.5 rounded-full hover:border-[#008080] hover:text-[#008080] transition-colors cursor-default">
+                {area}
+              </span>
             ))}
           </div>
         </div>
