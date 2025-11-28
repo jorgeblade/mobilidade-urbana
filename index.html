@@ -1,0 +1,318 @@
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp, AlertCircle, CheckCircle, MapPin, DollarSign, Car, Package, Monitor, Key, Bus, School, MessageCircle } from 'lucide-react';
+
+// --- DADOS DA APLICAÇÃO ---
+const data = [
+  {
+    id: 1,
+    category: "Logística & E-commerce",
+    icon: <Package className="text-white" size={24} />,
+    app: "Mercado Envios Extra",
+    earnings: "R$ 180 - R$ 280 / rota",
+    requirements: ["CNH Definitiva", "Veículo até 15 anos", "MEI Ativo (CNAE 5320-2/02)", "EPIs (Bota/Colete)"],
+    details: "Considerada a opção mais segura atualmente no RJ. Você agenda rotas em galpões (Pavuna, Queimados, Niterói) e realiza entregas de pacotes. Não lida com dinheiro vivo nem passageiros.",
+    bestFor: "Quem prioriza segurança e prefere não lidar com público."
+  },
+  {
+    id: 2,
+    category: "Transporte de Passageiros",
+    icon: <Car className="text-white" size={24} />,
+    app: "Uber / 99 / inDrive",
+    earnings: "R$ 200 - R$ 350 / dia (bruto)",
+    requirements: ["CNH com EAR", "Carro 4 portas c/ Ar", "Ano máx: 10 anos (RJ/Niterói)"],
+    details: "Alta demanda na ponte Rio-Niterói e São Gonçalo. O inDrive tem crescido em SG por permitir negociar o valor da corrida antes de aceitar, aumentando a segurança do motorista.",
+    bestFor: "Quem gosta de dirigir, conhece bem a cidade e precisa de giro diário de caixa."
+  },
+  {
+    id: 3,
+    category: "Entregas Rápidas (Last Mile)",
+    icon: <Car className="text-white" size={24} />,
+    app: "Lalamove / Uber Flash",
+    earnings: "R$ 50 - R$ 150 / entrega",
+    requirements: ["Carro (Hatch/Sedan)", "Banco rebatível ajuda", "App instalado"],
+    details: "Ideal para transporte de itens médios (bolos, peças, mudanças pequenas). Muito forte entre o Centro do Rio e a Zona Sul de Niterói (Icaraí). Menor desgaste que passageiro.",
+    bestFor: "Proprietários de carros mais antigos ou utilitários."
+  },
+  {
+    id: 4,
+    category: "Renda Passiva & Publicidade",
+    icon: <Monitor className="text-white" size={24} />,
+    app: "Mobees / KM Money",
+    earnings: "R$ 300 - R$ 1.000 / mês",
+    requirements: ["Ser motorista de app ativo", "Rodar alta KM diária", "Carro sem avarias estéticas"],
+    details: "Você instala um painel de LED no teto ou adesiva o carro. A renda entra passivamente enquanto você roda trabalhando em outros apps.",
+    bestFor: "Motoristas 'Full-time' que rodam mais de 6h por dia."
+  },
+  {
+    id: 5,
+    category: "Aluguel Peer-to-Peer",
+    icon: <Key className="text-white" size={24} />,
+    app: "Moobie",
+    earnings: "R$ 1.500 - R$ 2.500 / mês (líquido)",
+    requirements: ["Carro até 10-12 anos", "Seguro gerido pela plataforma", "Disponibilidade do veículo"],
+    details: "Você aluga seu carro para outra pessoa usar (geralmente turistas ou motoristas de app). O seguro da plataforma cobre o período de locação.",
+    bestFor: "Quem tem carro parado na garagem e quer renda sem trabalhar."
+  }
+];
+
+const schoolData = {
+  title: "Transporte Escolar Alternativo",
+  earnings: "R$ 5.000 - R$ 12.000 / mês (Líquido Est.)",
+  details: "Diferente dos apps, aqui você tem receita recorrente (mensalidade garantida). Mercado em alta devido à escassez de vans regularizadas pós-pandemia.",
+  requirements: [
+    "Curso de Transporte Escolar (Sest/Senat)",
+    "CNH Categoria D + EAR",
+    "Veículo Padronizado (Faixa Amarela + Tacógrafo)",
+    "Autorização da Prefeitura (SMTR no Rio / Niterói Transporte)",
+    "Presença de Monitor(a) para menores de idade"
+  ],
+  alert: "Atenção: A fiscalização em Niterói está multando em até R$ 4.000 veículos irregulares. O caminho é a legalização."
+};
+
+const marketRules = [
+  { 
+    title: "Obrigatório: EAR na CNH", 
+    desc: "A observação 'Exerce Atividade Remunerada' é lei. Sem ela, em caso de blitz, você pode ter o veículo apreendido e ser multado, além de ser bloqueado nas plataformas." 
+  },
+  { 
+    title: "Gestão de Caixa", 
+    desc: "Faturamento não é lucro. No RJ, o custo do GNV/Gasolina consome cerca de 30-40%. Separe dinheiro diariamente para manutenção preventiva." 
+  },
+  { 
+    title: "Segurança Regional", 
+    desc: "Em Niterói e SG, evite atalhos sugeridos pelo Waze em áreas desconhecidas. Prefira vias principais. No Mercado Envios, as rotas de risco são bloqueadas pelo sistema." 
+  },
+  { 
+    title: "Postura Profissional", 
+    desc: "Sua nota define sua prioridade de chamadas. Mantenha o carro limpo, ar-condicionado funcional e trate a atividade como uma empresa de verdade." 
+  }
+];
+
+// Componente do Card Expansível
+const Card = ({ item }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg border-l-8 border-[#008080] overflow-hidden mb-6 transition-all duration-300 hover:shadow-2xl group">
+      <div 
+        className="p-6 cursor-pointer flex justify-between items-center bg-white"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-4">
+          <div className="bg-[#008080] p-3 rounded-full shadow-md group-hover:bg-black transition-colors duration-300">
+            {item.icon}
+          </div>
+          <div>
+            <span className="text-xs font-bold text-[#008080] uppercase tracking-wider mb-1 block">{item.category}</span>
+            <h3 className="text-xl md:text-2xl font-extrabold text-gray-900 leading-tight">{item.app}</h3>
+            <div className="flex items-center mt-2 text-gray-600 bg-gray-100 px-3 py-1 rounded-full w-fit">
+              <DollarSign size={16} className="mr-1 text-[#008080]" />
+              <span className="font-semibold text-sm">{item.earnings}</span>
+            </div>
+          </div>
+        </div>
+        {isOpen ? <ChevronUp className="text-[#008080]"/> : <ChevronDown className="text-gray-400"/>}
+      </div>
+
+      {isOpen && (
+        <div className="bg-gray-50 p-6 border-t border-gray-100 animate-fadeIn">
+          <p className="text-gray-700 mb-6 text-lg leading-relaxed">{item.details}</p>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <h4 className="font-bold text-gray-900 mb-3 flex items-center border-b pb-2 border-gray-100">
+                <CheckCircle size={18} className="mr-2 text-[#008080]"/> Requisitos
+              </h4>
+              <ul className="space-y-2">
+                {item.requirements.map((req, idx) => (
+                  <li key={idx} className="flex items-start text-sm text-gray-600">
+                    <span className="w-1.5 h-1.5 bg-[#008080] rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                    {req}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex flex-col justify-center bg-[#008080]/5 p-4 rounded-lg border border-[#008080]/20">
+              <strong className="text-[#008080] mb-1 block">Perfil Ideal:</strong>
+              <p className="text-gray-700 text-sm italic">"{item.bestFor}"</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default function BladeTecApp() {
+  return (
+    <div className="min-h-screen bg-gray-100 font-sans selection:bg-[#008080] selection:text-white">
+      
+      {/* HEADER INSTITUCIONAL */}
+      <header className="bg-black text-white py-12 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#008080] opacity-20 rounded-full blur-[100px] transform translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gray-700 opacity-20 rounded-full blur-[80px] transform -translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+        
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 border-b border-gray-800 pb-8">
+            <div className="flex flex-col">
+              <h1 className="text-4xl font-black tracking-tighter text-white">
+                BLADE<span className="text-[#008080]">TEC</span>
+              </h1>
+              <span className="text-gray-400 text-xs tracking-[0.3em] uppercase mt-1">Consultoria & Soluções</span>
+            </div>
+            
+            <div className="text-right hidden md:block">
+              <p className="text-[#008080] font-bold text-sm">PROJETO DE CONSULTORIA</p>
+              <p className="text-gray-500 text-xs">Mobilidade Urbana • RJ/Niterói/SG</p>
+            </div>
+          </div>
+
+          <div className="text-center md:text-left mt-4">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+              Oportunidades de Renda Extra <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008080] to-teal-400">
+                Com Seu Veículo Próprio
+              </span>
+            </h2>
+            <p className="text-lg text-gray-400 max-w-2xl leading-relaxed">
+              Mapeamento estratégico das principais plataformas ativas na região metropolitana do Rio de Janeiro.
+              Dados atualizados para maximizar seus ganhos com segurança.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* CONTEÚDO PRINCIPAL */}
+      <main className="max-w-5xl mx-auto px-4 py-8 -mt-10 relative z-20">
+        
+        {/* Contexto Regional */}
+        <div className="bg-white rounded-xl p-6 shadow-xl mb-10 flex flex-col md:flex-row items-center gap-6 border-l-4 border-gray-300">
+          <div className="bg-gray-100 p-4 rounded-full">
+            <MapPin className="text-gray-800" size={32} />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-lg text-gray-900 mb-1">Contexto Regional: Rio, Niterói & São Gonçalo</h3>
+            <p className="text-gray-600 text-sm">
+              Esta região possui características únicas. A logística (entregas) tem se destacado pela segurança em comparação ao transporte de passageiros em determinadas áreas. 
+              Em Niterói/SG, a demanda é alta devido ao fluxo pendular com a capital.
+            </p>
+          </div>
+        </div>
+
+        {/* Lista de Oportunidades */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-8 w-1 bg-[#008080]"></div>
+          <h2 className="text-2xl font-bold text-gray-800">Painel de Oportunidades</h2>
+        </div>
+        
+        <div className="mb-10">
+          {data.map(item => (
+            <Card key={item.id} item={item} />
+          ))}
+        </div>
+
+        {/* --- SEÇÃO BÔNUS: TRANSPORTE ESCOLAR --- */}
+        <div className="mb-16 transform hover:scale-[1.01] transition-transform duration-300">
+          <div className="bg-gradient-to-r from-[#008080] to-teal-900 rounded-2xl shadow-2xl p-1">
+            <div className="bg-white rounded-xl p-8 h-full">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-yellow-400 p-3 rounded-full text-black">
+                  <School size={32} />
+                </div>
+                <div>
+                  <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide border border-yellow-200">
+                    Bônus de Mercado
+                  </span>
+                  <h2 className="text-3xl font-black text-gray-900 mt-1">{schoolData.title}</h2>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <p className="text-gray-700 text-lg mb-4">{schoolData.details}</p>
+                  <div className="bg-gray-50 border-l-4 border-[#008080] p-4 mb-4">
+                     <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="text-[#008080]" size={20} />
+                        <span className="font-bold text-gray-900">Potencial de Ganho:</span>
+                     </div>
+                     <p className="text-2xl font-bold text-[#008080]">{schoolData.earnings}</p>
+                  </div>
+                  <div className="bg-red-50 border border-red-100 p-4 rounded-lg flex gap-3">
+                    <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
+                    <p className="text-sm text-red-700 font-medium">{schoolData.alert}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                  <h4 className="font-bold text-gray-900 mb-4 flex items-center">
+                    <CheckCircle size={18} className="mr-2 text-[#008080]"/> Requisitos (Niterói / RJ)
+                  </h4>
+                  <ul className="space-y-3">
+                    {schoolData.requirements.map((req, idx) => (
+                      <li key={idx} className="flex items-start text-gray-700 text-sm">
+                        <Bus className="w-4 h-4 mt-0.5 mr-3 text-gray-400 flex-shrink-0" />
+                        {req}
+                      </li>
+                    ))}
+                  </ul>
+                  <button className="w-full mt-6 bg-[#008080] text-white py-2 rounded-lg font-bold hover:bg-teal-700 transition-colors text-sm">
+                    Verificar Regularização na SMTR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Seção Regras de Ouro */}
+        <div className="bg-[#1a1a1a] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-r from-[#008080] via-gray-700 to-black"></div>
+          
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-white mb-2">Regras de Ouro do Mercado</h2>
+            <p className="text-gray-400">Diretrizes essenciais para garantir longevidade e lucro na atividade.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {marketRules.map((rule, index) => (
+              <div key={index} className="flex gap-5 group">
+                <div className="mt-1 bg-gray-800 p-3 rounded-lg h-fit group-hover:bg-[#008080] transition-colors duration-300">
+                  <AlertCircle className="text-[#008080] group-hover:text-white transition-colors" size={24} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xl text-white mb-2 group-hover:text-[#008080] transition-colors">{rule.title}</h4>
+                  <p className="text-gray-400 text-sm leading-relaxed border-l border-gray-700 pl-4">{rule.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="bg-black text-gray-500 py-12 text-center border-t border-gray-900 mt-12">
+        <div className="max-w-4xl mx-auto px-4 flex flex-col items-center">
+          <h3 className="text-3xl font-black text-white mb-2 tracking-tighter">
+            BLADE<span className="text-[#008080]">TEC</span>
+          </h3>
+          <p className="mb-8 max-w-md mx-auto text-sm text-gray-400">
+            Desenvolvendo soluções tecnológicas que impulsionam negócios e pessoas desde 2016.
+          </p>
+          
+          <a 
+            href="https://wa.me/5521985732158"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#008080]/10 border border-[#008080]/30 rounded-full px-8 py-3 mb-8 flex items-center gap-3 hover:bg-[#008080]/20 transition-colors cursor-pointer group no-underline"
+          >
+            <MessageCircle className="text-[#008080] group-hover:scale-110 transition-transform" />
+            <span className="text-white font-bold text-lg">(21) 98573-2158</span>
+          </a>
+
+          <div className="w-16 h-1 bg-[#008080] mx-auto rounded mb-6 opacity-50"></div>
+          <p className="text-xs opacity-40">© 2025 BLADETEC SOLUÇÕES - Todos os direitos reservados.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
